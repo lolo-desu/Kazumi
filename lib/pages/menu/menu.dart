@@ -171,7 +171,7 @@ class _ScaffoldMenu extends State<ScaffoldMenu> with RouteAware {
   }
 
   Widget _sideMenu(BuildContext context, int selectedIndex) {
-    if (GnomeTheme.enabled) {
+    if (GnomeTheme.enabled && MediaQuery.sizeOf(context).width >= 600) {
       return Scaffold(
         body: Row(
           children: [

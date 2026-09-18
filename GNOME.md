@@ -53,3 +53,13 @@ manual acceptance is performed. Existing upstream code and tests are preserved.
 [header bars](https://developer.gnome.org/hig/patterns/containers/header-bars.html).
 
 The upstream license and attribution remain unchanged.
+
+## Page render previews
+
+These are renders of real application widgets in regression tests with isolated
+fixture data, not screenshots of a signed-in user session. Both light and dark
+screens are tested at narrow and wide widths.
+
+![Light GNOME presentation](docs/gnome/light.png)
+
+![Dark GNOME presentation](docs/gnome/dark.png)
