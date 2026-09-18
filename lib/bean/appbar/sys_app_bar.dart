@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,7 +70,7 @@ class SysAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: title!,
               )
             : null,
-        centerTitle: Platform.isIOS ? true : false,
+        centerTitle: GnomeTheme.enabled || Platform.isIOS,
         actions: acs.map((e) {
           return EmbeddedNativeControlArea(
             requireOffset: needTopOffset,

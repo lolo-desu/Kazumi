@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
@@ -38,8 +39,10 @@ class _StateShapeClipper extends CustomClipper<Path> {
   static final _path = MaterialShapes.cookie4Sided.toPath();
 
   @override
-  Path getClip(Size size) => _path
-      .transform(Matrix4.diagonal3Values(size.width, size.height, 1).storage);
+  Path getClip(Size size) => GnomeTheme.enabled
+      ? (Path()..addRRect(RRect.fromRectAndRadius(
+          Offset.zero & size, const Radius.circular(12))))
+      : _path.transform(Matrix4.diagonal3Values(size.width, size.height, 1).storage);
 
   @override
   bool shouldReclip(_StateShapeClipper oldClipper) => false;
@@ -77,7 +80,7 @@ class StateActionButton extends StatelessWidget {
           EdgeInsets.symmetric(horizontal: 24, vertical: 12)),
       shape: WidgetStateProperty.resolveWith((states) => RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-                states.contains(WidgetState.pressed) ? 16 : 28),
+                GnomeTheme.enabled ? 6 : (states.contains(WidgetState.pressed) ? 16 : 28)),
           )),
       animationDuration: MediaQuery.disableAnimationsOf(context)
           ? Duration.zero

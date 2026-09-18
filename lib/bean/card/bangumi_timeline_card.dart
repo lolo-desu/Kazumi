@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -218,7 +219,9 @@ class BangumiTimelineCard extends StatelessWidget {
         padding: _ratingPadding,
         decoration: ShapeDecoration(
           color: colors.secondaryContainer,
-          shape: const StadiumBorder(),
+          shape: GnomeTheme.enabled
+                      ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6)))
+                      : const StadiumBorder(),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

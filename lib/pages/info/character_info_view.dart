@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:kazumi/bean/card/network_img_layer.dart';
@@ -61,7 +62,9 @@ class CharacterInfoView extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: ShapeDecoration(
                     color: theme.colorScheme.secondaryContainer,
-                    shape: const StadiumBorder(),
+                    shape: GnomeTheme.enabled
+                      ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6)))
+                      : const StadiumBorder(),
                   ),
                   child: Text(relation,
                       style: theme.textTheme.labelLarge?.copyWith(

@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:kazumi/bean/settings/settings_list.dart';
 import 'package:kazumi/bean/widget/content_section.dart';
@@ -243,7 +244,7 @@ class _WatchStatsPanel extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Material(
       color: compact ? colors.primaryContainer : colors.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(compact ? 28 : 48),
+      borderRadius: BorderRadius.circular(GnomeTheme.enabled ? 12 : (compact ? 28 : 48)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -509,7 +510,7 @@ class _PreferencesPanel extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Material(
       color: colors.surfaceContainerLow,
-      borderRadius: _tileRadius,
+      borderRadius: GnomeTheme.enabled ? BorderRadius.circular(12) : _tileRadius,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -635,7 +636,7 @@ class _ArrowCue extends StatelessWidget {
           width: 52,
           height: 32,
           decoration: BoxDecoration(
-              color: color, borderRadius: BorderRadius.circular(20)),
+              color: color, borderRadius: BorderRadius.circular(GnomeTheme.enabled ? 6 : 20)),
           child: Icon(Icons.arrow_forward_rounded, color: foreground, size: 20),
         ),
       );
@@ -661,7 +662,7 @@ class _ShapeIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
         child: ClipPath(
-          clipper: _SpaceShapeClipper(shape),
+          clipper: GnomeTheme.enabled ? const _GnomeIconClipper() : _SpaceShapeClipper(shape),
           child: ColoredBox(
             color: color,
             child: SizedBox.square(
@@ -671,6 +672,18 @@ class _ShapeIcon extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _GnomeIconClipper extends CustomClipper<Path> {
+  const _GnomeIconClipper();
+
+  @override
+  Path getClip(Size size) => Path()..addRRect(RRect.fromRectAndRadius(
+    Offset.zero & size, const Radius.circular(12),
+  ));
+
+  @override
+  bool shouldReclip(_GnomeIconClipper oldClipper) => false;
 }
 
 class _SpaceShapeClipper extends CustomClipper<Path> {
@@ -721,7 +734,7 @@ class _ExpressiveActionState extends State<_ExpressiveAction> {
     return Semantics(
       button: true,
       child: AnimatedScale(
-        scale: _pressed && !reducedMotion ? .97 : 1,
+        scale: _pressed && !reducedMotion && !GnomeTheme.enabled ? .97 : 1,
         duration: duration,
         curve: _pressed ? Curves.easeOutCubic : Curves.easeOutBack,
         child: AnimatedContainer(
@@ -730,7 +743,9 @@ class _ExpressiveActionState extends State<_ExpressiveAction> {
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: widget.color,
-            borderRadius: _pressed ? BorderRadius.circular(16) : widget.radius,
+            borderRadius: GnomeTheme.enabled
+                ? BorderRadius.circular(12)
+                : (_pressed ? BorderRadius.circular(16) : widget.radius),
           ),
           child: Material(
             type: MaterialType.transparency,

@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:kazumi/bean/appbar/sys_app_bar.dart';
 
@@ -62,7 +63,9 @@ class SettingsDetailScaffold extends StatelessWidget {
             paneLeading == null ? 24 : NavigationToolbar.kMiddleSpacing,
         leading: paneLeading,
         title: title,
-        titleTextStyle: Theme.of(context).textTheme.headlineSmall,
+        titleTextStyle: GnomeTheme.enabled
+            ? Theme.of(context).appBarTheme.titleTextStyle
+            : Theme.of(context).textTheme.headlineSmall,
         actions: actions,
       );
     } else {

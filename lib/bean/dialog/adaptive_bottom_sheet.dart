@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 // Adapted from m3e_core 1.1.2's M3EBottomSheet (MIT).
 // Copyright (c) 2026 Mudit Purohit. See licenses/m3e_core.txt.
 import 'dart:math' as math;
@@ -140,7 +141,9 @@ class _MaterialSheetSurfaceState extends State<_MaterialSheetSurface>
     final surface = Material(
       color: background,
       elevation: 0,
-      shape: _materialSheetShape,
+      shape: GnomeTheme.enabled
+          ? theme.bottomSheetTheme.shape
+          : _materialSheetShape,
       clipBehavior: Clip.antiAlias,
       child: Theme(
         data: theme.copyWith(

@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 
@@ -188,7 +189,9 @@ class _StepShapeClipper extends CustomClipper<Path> {
   };
 
   @override
-  Path getClip(Size size) => _paths[shape]!
+  Path getClip(Size size) => GnomeTheme.enabled
+      ? (Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(12))))
+      : _paths[shape]!
       .transform(Matrix4.diagonal3Values(size.width, size.height, 1).storage);
 
   @override

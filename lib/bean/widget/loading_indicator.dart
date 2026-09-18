@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.disableAnimationsOf(context) ||
+    if (GnomeTheme.enabled || MediaQuery.disableAnimationsOf(context) ||
         !TickerMode.valuesOf(context).enabled) {
       _controller.stop();
     } else if (!_controller.isAnimating) {
@@ -60,6 +61,20 @@ class _LoadingIndicatorState extends State<LoadingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    if (GnomeTheme.enabled) {
+      return SizedBox.square(
+        dimension: widget.size,
+        child: Padding(
+          padding: EdgeInsets.all(widget.size * .2),
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: widget.color,
+            semanticsLabel: widget.semanticsLabel,
+            value: MediaQuery.disableAnimationsOf(context) ? .75 : null,
+          ),
+        ),
+      );
+    }
     return Semantics(
       label: widget.semanticsLabel,
       child: RepaintBoundary(

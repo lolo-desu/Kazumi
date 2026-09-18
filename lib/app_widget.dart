@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -310,8 +311,8 @@ class _AppWidgetState extends State<AppWidget>
           ],
           locale: const Locale.fromSubtags(
               languageCode: 'zh', scriptCode: 'Hans', countryCode: "CN"),
-          theme: lightTheme,
-          darkTheme: effectiveDarkTheme,
+          theme: GnomeTheme.apply(lightTheme),
+          darkTheme: GnomeTheme.apply(effectiveDarkTheme),
           themeMode: themeProvider.themeMode,
           scaffoldMessengerKey: rootScaffoldMessengerKey,
           routerConfig: ModularApp.routerConfigOf(context),

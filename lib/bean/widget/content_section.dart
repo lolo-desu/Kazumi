@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 
 import 'package:kazumi/bean/widget/split_list_row.dart';
@@ -19,7 +20,8 @@ class SectionHeader extends StatelessWidget {
           header: true,
           child: DefaultTextStyle.merge(
             style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.primary,
+              color: GnomeTheme.enabled
+                  ? theme.colorScheme.onSurface : theme.colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
             child: title,

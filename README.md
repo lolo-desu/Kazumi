@@ -1,3 +1,8 @@
+> **GNOME desktop fork** — Linux uses GNOME-style neutral surfaces, headers,
+> sidebars and controls while retaining upstream routes, playback and settings.
+> Other platforms keep the upstream presentation. See [GNOME migration and validation](GNOME.md).
+> This is a Flutter frontend adaptation, not a GTK/libadwaita rewrite.
+
 <div align=center>
 
 <h1>Kazumi</h1>

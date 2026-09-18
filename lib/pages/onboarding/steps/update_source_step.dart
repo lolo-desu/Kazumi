@@ -1,3 +1,4 @@
+import 'package:kazumi/utils/gnome_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:kazumi/pages/onboarding/onboarding_step_layout.dart';
 
@@ -110,7 +111,9 @@ class _OptionCard extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: ShapeDecoration(
                       color: colors.tertiaryContainer,
-                      shape: const StadiumBorder()),
+                      shape: GnomeTheme.enabled
+                      ? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6)))
+                      : const StadiumBorder()),
                   child: Text('推荐',
                       style: theme.textTheme.labelMedium
                           ?.copyWith(color: colors.onTertiaryContainer)),

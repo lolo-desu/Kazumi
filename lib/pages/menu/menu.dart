@@ -1,3 +1,5 @@
+import 'package:kazumi/utils/gnome_theme.dart';
+import 'package:kazumi/utils/gnome_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter/services.dart';
@@ -169,6 +171,33 @@ class _ScaffoldMenu extends State<ScaffoldMenu> with RouteAware {
   }
 
   Widget _sideMenu(BuildContext context, int selectedIndex) {
+    if (GnomeTheme.enabled) {
+      return Scaffold(
+        body: Row(
+          children: [
+            EmbeddedNativeControlArea(
+              child: GnomeSidebar(
+                selectedIndex: selectedIndex,
+                labels: const ['推荐', '时间表', '追番', '我的'],
+                icons: const [
+                  Icon(Icons.home_outlined),
+                  Icon(Icons.timeline),
+                  Icon(Icons.favorite_border),
+                  Icon(Icons.settings_outlined),
+                ],
+                onSelected: _selectDestination,
+                header: OutlinedButton.icon(
+                  onPressed: () => context.pushNamed('/search/'),
+                  icon: const Icon(Icons.search),
+                  label: const Text('搜索'),
+                ),
+              ),
+            ),
+            Expanded(child: _outlet(context)),
+          ],
+        ),
+      );
+    }
     const borderRadius = BorderRadius.only(
       topLeft: Radius.circular(16),
       bottomLeft: Radius.circular(16),
