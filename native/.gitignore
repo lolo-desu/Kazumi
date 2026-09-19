@@ -3,5 +3,10 @@ core/.dart_tool/
 core/lib/
 core/test/
 core/upstream-sources.json
-bin/
+/bin/
 test-output/
+
+!tests/
+!tests/**
+!core/bin/
+!core/bin/**
