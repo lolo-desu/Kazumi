@@ -15,9 +15,18 @@ class Http:
         self.cookies = http.cookiejar.MozillaCookieJar(str(store.path / "cookies.txt"))
         if (store.path / "cookies.txt").exists():
             self.cookies.load(ignore_discard=True)
-        self.opener = urllib.request.build_opener(
-            urllib.request.HTTPCookieProcessor(self.cookies)
-        )
+        self.opener = self._build_opener(store.get("proxy", ""))
+
+    def _build_opener(self, proxy=""):
+        handlers = [urllib.request.HTTPCookieProcessor(self.cookies)]
+        if proxy:
+            handlers.insert(0, urllib.request.ProxyHandler({"http": proxy, "https": proxy}))
+        return urllib.request.build_opener(*handlers)
+
+    def set_proxy(self, proxy):
+        """Apply a new HTTP(S) proxy for subsequent requests."""
+        with self.lock:
+            self.opener = self._build_opener(proxy.strip())
 
     def request(
         self,

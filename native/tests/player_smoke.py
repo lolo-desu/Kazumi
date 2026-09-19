@@ -1,4 +1,5 @@
 import sys
+import os
 import functools
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -15,6 +16,10 @@ from gi.repository import GLib
 from nativeapp.app import Application
 from nativeapp.storage import Store
 from nativeapp.services import APP
+
+if os.environ.get("NATIVE_TEST_AUDIO_OUTPUT"):
+    from nativeapp.player import Video
+    Video.__init__ = functools.partialmethod(Video.__init__, audio_output=os.environ["NATIVE_TEST_AUDIO_OUTPUT"])
 
 app = Application(Store(APP, tempfile.mkdtemp()), True)
 errors = []

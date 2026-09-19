@@ -34,6 +34,7 @@ jobs:
           GDK_BACKEND: x11
           GSK_RENDERER: cairo
           LIBGL_ALWAYS_SOFTWARE: 1
+          NATIVE_TEST_AUDIO_OUTPUT: "null"
         run: |
           ffmpeg -loglevel error -f lavfi -i testsrc2=size=640x360:rate=24 -t 8 -c:v mpeg4 -y /tmp/native-test.mp4
           ffmpeg -loglevel error -f lavfi -i sine=frequency=440 -t 8 -c:a aac -y /tmp/native-audio.m4a

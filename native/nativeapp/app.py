@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import re
 import sys
+from datetime import datetime
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -51,6 +52,7 @@ class Window(Adw.ApplicationWindow):
         self.jobs = ThreadPoolExecutor(max_workers=3, thread_name_prefix="network")
         self.images = ThreadPoolExecutor(max_workers=2, thread_name_prefix="images")
         self.generation, self.closed, self.playback = 0, False, None
+        self.messages = []
         self.current_route = "popular"
         self.toast = Adw.ToastOverlay()
         self.set_content(self.toast)
@@ -137,8 +139,14 @@ class Window(Adw.ApplicationWindow):
         return False
 
     def message(self, text):
+        # Keep a bounded, credential-free in-app log so failures can be
+        # inspected without opening a terminal.  Toasts remain the immediate
+        # feedback for normal actions.
+        text = str(text)
+        self.messages.append(f"{datetime.now():%H:%M:%S}  {text[:500]}")
+        del self.messages[:-200]
         if not self.closed:
-            self.toast.add_toast(Adw.Toast(title=str(text)[:250]))
+            self.toast.add_toast(Adw.Toast(title=text[:250]))
         return False
 
     def async_call(self, operation, callback, error=None, scoped=True, image=False):
@@ -542,6 +550,8 @@ class Window(Adw.ApplicationWindow):
             ("下载管理", "离线观看", "folder-download-symbolic", self.download_page),
             ("备份与恢复", "原生版资料库备份", "document-save-symbolic", self.backup),
             ("设置", "外观与播放", "preferences-system-symbolic", self.settings),
+            ("操作日志", "查看最近的错误和网络状态", "document-properties-symbolic", self.logs),
+            ("关于", "版本、许可证和项目链接", "help-about-symbolic", self.about),
         ]:
             if APP != "Kazumi" and title == "规则管理":
                 continue
@@ -657,6 +667,70 @@ class Window(Adw.ApplicationWindow):
 
         dialog.open(self, None, selected)
 
+    def about(self):
+        dialog = Adw.AboutDialog(
+            application_name=APP,
+            application_icon="applications-multimedia-symbolic",
+            version="GTK4 native preview",
+            developer_name="lolo-desu",
+            license_type=Gtk.License.MIT_X11,
+            comments="使用 GTK4 与 libadwaita 的 GNOME 原生界面；保留上游数据和网络服务。",
+            website=(
+                "https://github.com/lolo-desu/Kazumi"
+                if APP == "Kazumi"
+                else "https://github.com/lolo-desu/PiliPlus"
+            ),
+            issue_url="https://github.com/lolo-desu/"
+            + ("Kazumi" if APP == "Kazumi" else "PiliPlus")
+            + "/issues",
+        )
+        dialog.present(self)
+
+    def logs(self):
+        body = margins(Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12))
+        self.push(
+            "操作日志",
+            Gtk.ScrolledWindow(child=Adw.Clamp(maximum_size=900, child=body)),
+        )
+        header = Gtk.Box(spacing=8)
+        copy = Gtk.Button(label="复制全部")
+        clear = Gtk.Button(label="清空")
+        header.append(copy)
+        header.append(clear)
+        body.append(header)
+        view = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        view.set_vexpand(True)
+        view.add_css_class("card")
+        body.append(view)
+
+        def refresh():
+            view.get_buffer().set_text("\n".join(self.messages) or "暂无日志")
+
+        def copy_all(*_):
+            self.get_clipboard().set_text("\n".join(self.messages))
+            self.message("日志已复制")
+
+        copy.connect("clicked", copy_all)
+        clear.connect("clicked", lambda *_: (self.messages.clear(), refresh()))
+        refresh()
+
+    def shortcuts(self):
+        dialog = Adw.PreferencesDialog(title="键盘快捷键")
+        page = Adw.PreferencesPage()
+        group = Adw.PreferencesGroup(title="全局")
+        for title, shortcut in [
+            ("搜索", "Ctrl + F"),
+            ("返回上一页", "Esc"),
+            ("全屏播放", "F"),
+            ("播放 / 暂停", "Space"),
+            ("前进 / 后退 5 秒", "← / →"),
+            ("调节音量", "↑ / ↓"),
+        ]:
+            group.add(action_row(title=title, subtitle=shortcut))
+        page.add(group)
+        dialog.add(page)
+        dialog.present(self)
+
     def apply_theme(self):
         schemes = {
             "system": Adw.ColorScheme.DEFAULT,
@@ -703,6 +777,18 @@ class Window(Adw.ApplicationWindow):
             "notify::value", lambda *_: self.store.set("speed", speed.get_value())
         )
         group.add(speed)
+        page.add(group)
+        group = Adw.PreferencesGroup(title="帮助")
+        shortcut_row = action_row(title="键盘快捷键", subtitle="查看播放器和导航快捷键", activatable=True)
+        shortcut_row.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
+        shortcut_row.connect("activated", lambda *_: self.shortcuts())
+        group.add(shortcut_row)
+        page.add(group)
+        group = Adw.PreferencesGroup(title="网络")
+        proxy = Adw.EntryRow(title="HTTP 代理（可选）")
+        proxy.set_text(self.store.get("proxy", ""))
+        proxy.connect("changed", lambda row: (self.store.set("proxy", row.get_text()), self.http.set_proxy(row.get_text())))
+        group.add(proxy)
         page.add(group)
         dialog.add(page)
         dialog.present(self)

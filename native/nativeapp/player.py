@@ -59,13 +59,14 @@ def library(name, env):
 
 
 class Video(Gtk.GLArea):
-    def __init__(self, report, volume=80):
+    def __init__(self, report, volume=80, audio_output=None):
         super().__init__(hexpand=True, vexpand=True)
         self.set_size_request(240, 160)
         self.set_allowed_apis(Gdk.GLAPI.GL | Gdk.GLAPI.GLES)
         self.set_auto_render(False)
         self.report = report
         self.initial_volume = volume
+        self.audio_output = audio_output
         self.handle = None
         self.render_context = C.c_void_p()
         self.worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="mpv")
@@ -130,7 +131,7 @@ class Video(Gtk.GLArea):
                 ("idle", "yes"),
                 ("keep-open", "yes"),
                 ("volume", str(self.initial_volume)),
-            ]:
+            ] + ([("ao", self.audio_output)] if self.audio_output else []):
                 if (
                     self.mpv.mpv_set_option_string(self.handle, k.encode(), v.encode())
                     < 0
@@ -202,17 +203,20 @@ class Video(Gtk.GLArea):
 
             self.worker.submit(run)
 
-    def load(self, url, headers=None, audio=None, start=0):
+    def load(self, url, headers=None, audio=None, start=0, paused=False):
         if not self.ready:
-            self.pending = (url, headers, audio, start)
+            self.pending = (url, headers, audio, start, paused)
             return
         self.set_list(
             "http-header-fields", [f"{k}: {v}" for k, v in (headers or {}).items()]
         )
         self.set_list("audio-files", [audio] if audio else [])
+        # mpv applies the pause property to the currently loaded file.  Queue
+        # loadfile before pause so a paused quality switch remains paused after
+        # the new stream replaces the old one.
         self.command("set", "start", str(start))
         self.command("loadfile", url, "replace")
-        self.command("set", "pause", "no")
+        self.command("set", "pause", "yes" if paused else "no")
 
     def set_list(self, name, values):
         if not self.ready or self.closed:

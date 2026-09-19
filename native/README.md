@@ -21,6 +21,8 @@ nix-shell shell.nix --run ./build-core
 ## 已接入的路径
 
 - 原生自适应侧栏、搜索、详情、设置和文件对话框，系统浅色/深色。
+- GNOME 原生“关于”、操作日志和键盘快捷键页面；日志只保留最近 200 条消息，不写入账号凭据。
+- 设置中的 HTTP/HTTPS 代理可即时启用或清除，网络请求继续共享同一 Cookie 容器。
 - 本地收藏、历史、播放进度、原生资料库 JSON 导入导出。
 - 原生弹幕叠加：滚动/顶部/底部弹幕、JSON/XML 导入、字体/透明度/显示区域/偏移/关键词屏蔽。高级 BAS 和弹幕发送尚未迁移。
 - 内嵌 Gtk.GLArea + libmpv：播放、暂停、跳转、音量、倍速、全屏、外挂字幕、音轨切换、截图。
@@ -45,7 +47,7 @@ nix-shell shell.nix --run ./build-core
 
 - `python3 -m unittest discover -s native/tests -p 'test_*.py'`：存储/协议/规则回归。
 - `python3 native/tests/smoke.py`：真实 GTK 窗口、导航、收藏详情、设置弹窗与截图；支持 `NATIVE_TEST_WIDTH=460`、`NATIVE_TEST_DARK=1`。
-- `python3 native/tests/player_smoke.py /path/to/640x360-test-video.mp4`：真实 GLArea + libmpv 解码、进度、暂停、跳转；可传第二个 AAC 音频文件参数，验证独立 HTTP 音轨。
+- `python3 native/tests/player_smoke.py /path/to/640x360-test-video.mp4`：真实 GLArea + libmpv 解码、进度、暂停、跳转；可传第二个 AAC 音频文件参数，验证独立 HTTP 音轨。PiliPlus 测试还覆盖画质切换时的进度与暂停状态。
 - `python3 native/tests/webview_smoke.py`：本地 HTTP fixture 验证真实 WebKit 媒体探测及 HttpOnly Cookie 回传。
 - `native/build-core`：上游规则测试和真实 Hive fixture 迁移/源文件哈希不变测试。
 - 本机 Wayland 上播放器测试通过。自动化不覆盖账号操作、所有在线播放源及完整易用性验收。

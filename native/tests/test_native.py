@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import urllib.request
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from nativeapp.storage import Store
@@ -92,6 +93,32 @@ class NativeTests(unittest.TestCase):
                 {"name": "new", "api": "99", "baseURL": "https://example.com"}
             )
         self.assertEqual(self.service.plugins(), [])
+
+    def test_proxy_setting_is_applied_without_replacing_cookie_jar(self):
+        http = Http(self.store)
+        self.store.set("proxy", "http://127.0.0.1:7890")
+        http.set_proxy(self.store.get("proxy"))
+        self.assertTrue(
+            any(
+                isinstance(handler, urllib.request.ProxyHandler)
+                for handler in http.opener.handlers
+            )
+        )
+        self.assertIsInstance(
+            next(
+                handler
+                for handler in http.opener.handlers
+                if isinstance(handler, urllib.request.HTTPCookieProcessor)
+            ),
+            urllib.request.HTTPCookieProcessor,
+        )
+        http.set_proxy("")
+        self.assertFalse(
+            any(
+                isinstance(handler, urllib.request.ProxyHandler)
+                for handler in http.opener.handlers
+            )
+        )
 
     def test_local_history_uses_stable_id(self):
         self.store.put("history", {"id": "1", "position": 10})

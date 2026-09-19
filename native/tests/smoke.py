@@ -41,6 +41,13 @@ def capture():
         dialog = window.get_visible_dialog()
         assert dialog is not None
         dialog.close()
+        window.about()
+        about = window.get_visible_dialog()
+        assert about is not None
+        about.close()
+        window.logs()
+        assert window.navigation.get_visible_page().get_title() == "操作日志"
+        window.navigation.pop()
         window.navigate("collect") if "collect" in window.routes else window.library(
             "collect"
         )
