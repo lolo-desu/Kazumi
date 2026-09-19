@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "$(readlink -f -- "$0")")"
+python3 prepare_core.py
+mkdir -p bin
+cd core
+dart pub get
+dart analyze
+dart test
+dart compile exe bin/bridge.dart -o ../bin/kazumi-core

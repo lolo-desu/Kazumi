@@ -1,0 +1,54 @@
+name: GTK4 Native (experimental)
+on:
+  push:
+    branches: [gtk4-native]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-webkit-6.0 libmpv2 ffmpeg xvfb dbus-x11 mesa-utils
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Build unchanged upstream rule strategies
+        run: native/build-core
+      - name: Protocol and storage tests
+        run: python3 -m unittest discover -s native/tests -p 'test_*.py'
+      - name: GTK widgets and screenshots
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+          NATIVE_TEST_OUTPUT: native/test-output
+        run: |
+          xvfb-run -a dbus-run-session -- python3 native/tests/smoke.py
+          NATIVE_TEST_WIDTH=460 NATIVE_TEST_DARK=1 xvfb-run -a dbus-run-session -- python3 native/tests/smoke.py
+      - name: Native video integration
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+          LIBGL_ALWAYS_SOFTWARE: 1
+        run: |
+          ffmpeg -loglevel error -f lavfi -i testsrc2=size=640x360:rate=24 -t 8 -c:v mpeg4 -y /tmp/native-test.mp4
+          xvfb-run -a dbus-run-session -- python3 native/tests/player_smoke.py /tmp/native-test.mp4
+      - name: Package experimental native frontend
+        run: |
+          mkdir -p package/native
+          cp -r native/nativeapp native/run native/shell.nix native/README.md native/feature-inventory.json package/native/
+          cp -r assets package/
+          cp -r native/bin package/native/
+          cp LICENSE* package/
+          find package -type d -name __pycache__ -prune -exec rm -r {} +
+          tar -czf Kazumi-gtk4-experimental-linux-x64.tar.gz -C package .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Kazumi-gtk4-experimental-linux-x64
+          path: |
+            Kazumi-gtk4-experimental-linux-x64.tar.gz
+            native/test-output/*.png

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "$(readlink -f -- "$0")")"
+if [[ -f /etc/NIXOS && "${NATIVE_IN_SHELL:-}" != 1 ]]; then
+  printf -v native_args '%q ' "$@"
+  exec nix-shell shell.nix --run "./run $native_args"
+fi
+exec python3 -m nativeapp.app "$@"

@@ -1,3 +1,6 @@
+> **GTK4 原生迁移分支：开发中，尚未达到原版全功能等价。**
+> 运行方式、已接入功能及缺口：[native/README.md](native/README.md)。
+
 > **GNOME desktop fork** — Linux uses GNOME-style neutral surfaces, headers,
 > sidebars and controls while retaining upstream routes, playback and settings.
 > Other platforms keep the upstream presentation. See [GNOME migration and validation](GNOME.md).

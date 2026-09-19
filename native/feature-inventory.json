@@ -1,0 +1,281 @@
+{
+  "upstream_frontend": "Flutter",
+  "target_frontend": "GTK4/libadwaita",
+  "feature_parity": false,
+  "groups": [
+    {
+      "name": "about",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/about/about_module.dart",
+        "lib/pages/about/about_page.dart",
+        "lib/pages/about/about_widgets.dart",
+        "lib/pages/about/credits_page.dart"
+      ]
+    },
+    {
+      "name": "collect",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/collect/collect_controller.dart",
+        "lib/pages/collect/collect_library_card.dart",
+        "lib/pages/collect/collect_library_query.dart",
+        "lib/pages/collect/collect_library_view.dart",
+        "lib/pages/collect/collect_module.dart",
+        "lib/pages/collect/collect_page.dart",
+        "lib/pages/collect/collect_sync_dialog.dart"
+      ]
+    },
+    {
+      "name": "download",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/download/download_controller.dart",
+        "lib/pages/download/download_episode_sheet.dart",
+        "lib/pages/download/download_page.dart",
+        "lib/pages/download/download_page_module.dart",
+        "lib/pages/download/download_widgets.dart"
+      ]
+    },
+    {
+      "name": "error",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/error/storage_error_page.dart"
+      ]
+    },
+    {
+      "name": "history",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/history/history_controller.dart",
+        "lib/pages/history/history_list_query.dart",
+        "lib/pages/history/history_list_view.dart",
+        "lib/pages/history/history_module.dart",
+        "lib/pages/history/history_page.dart",
+        "lib/pages/history/history_record_tile.dart"
+      ]
+    },
+    {
+      "name": "index_module.dart",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/index_module.dart"
+      ]
+    },
+    {
+      "name": "index_page.dart",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/index_page.dart"
+      ]
+    },
+    {
+      "name": "info",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/info/character_info_view.dart",
+        "lib/pages/info/character_page.dart",
+        "lib/pages/info/info_comments_view.dart",
+        "lib/pages/info/info_controller.dart",
+        "lib/pages/info/info_module.dart",
+        "lib/pages/info/info_page.dart",
+        "lib/pages/info/info_tabview.dart",
+        "lib/pages/info/rating_review_dialog.dart",
+        "lib/pages/info/source_alias_dialog.dart",
+        "lib/pages/info/source_captcha_flow.dart",
+        "lib/pages/info/source_sheet.dart",
+        "lib/pages/info/source_sheet_view.dart"
+      ]
+    },
+    {
+      "name": "init_page.dart",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/init_page.dart"
+      ]
+    },
+    {
+      "name": "logs",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/logs/logs_page.dart"
+      ]
+    },
+    {
+      "name": "menu",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/menu/menu.dart",
+        "lib/pages/menu/route_visibility.dart"
+      ]
+    },
+    {
+      "name": "my",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/my/my_controller.dart",
+        "lib/pages/my/my_module.dart",
+        "lib/pages/my/my_page.dart",
+        "lib/pages/my/my_space_view.dart"
+      ]
+    },
+    {
+      "name": "onboarding",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/onboarding/onboarding_page.dart",
+        "lib/pages/onboarding/onboarding_step_layout.dart",
+        "lib/pages/onboarding/steps/disclaimer_step.dart",
+        "lib/pages/onboarding/steps/mirror_settings_step.dart",
+        "lib/pages/onboarding/steps/plugin_shop_step.dart",
+        "lib/pages/onboarding/steps/update_source_step.dart"
+      ]
+    },
+    {
+      "name": "player",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/player/controller/player_aspect_ratio.dart",
+        "lib/pages/player/controller/player_danmaku_controller.dart",
+        "lib/pages/player/controller/player_debug_controller.dart",
+        "lib/pages/player/controller/player_models.dart",
+        "lib/pages/player/controller/player_panel_controller.dart",
+        "lib/pages/player/controller/player_playback_controller.dart",
+        "lib/pages/player/controller/player_seek_controller.dart",
+        "lib/pages/player/controller/player_super_resolution.dart",
+        "lib/pages/player/controller/player_syncplay_controller.dart",
+        "lib/pages/player/danmaku_destination_sheet.dart",
+        "lib/pages/player/episode_comments_picker.dart",
+        "lib/pages/player/episode_comments_sheet.dart",
+        "lib/pages/player/episode_comments_view.dart",
+        "lib/pages/player/player_adjustment_hud.dart",
+        "lib/pages/player/player_controller.dart",
+        "lib/pages/player/player_item.dart",
+        "lib/pages/player/player_item_panel.dart",
+        "lib/pages/player/player_item_surface.dart",
+        "lib/pages/player/player_keyboard_shortcuts.dart",
+        "lib/pages/player/player_panel_hold.dart",
+        "lib/pages/player/player_pointer_interaction.dart",
+        "lib/pages/player/player_screenshot_feedback_overlay.dart",
+        "lib/pages/player/player_transport_bar.dart",
+        "lib/pages/player/syncplay_sheet.dart",
+        "lib/pages/player/video_details_sheet.dart"
+      ]
+    },
+    {
+      "name": "plugin_editor",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/plugin_editor/editor_form_widgets.dart",
+        "lib/pages/plugin_editor/plugin_catalog_view.dart",
+        "lib/pages/plugin_editor/plugin_editor_page.dart",
+        "lib/pages/plugin_editor/plugin_module.dart",
+        "lib/pages/plugin_editor/plugin_shop_page.dart",
+        "lib/pages/plugin_editor/plugin_test_page.dart",
+        "lib/pages/plugin_editor/plugin_update_actions.dart",
+        "lib/pages/plugin_editor/plugin_view_page.dart",
+        "lib/pages/plugin_editor/rule_dialogs.dart",
+        "lib/pages/plugin_editor/rule_management_widgets.dart"
+      ]
+    },
+    {
+      "name": "popular",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/popular/popular_controller.dart",
+        "lib/pages/popular/popular_module.dart",
+        "lib/pages/popular/popular_page.dart"
+      ]
+    },
+    {
+      "name": "route_error_page.dart",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/route_error_page.dart"
+      ]
+    },
+    {
+      "name": "router.dart",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/router.dart"
+      ]
+    },
+    {
+      "name": "search",
+      "status": "pending",
+      "upstream_files": [
+        "lib/pages/search/image_search_page.dart",
+        "lib/pages/search/image_search_widgets.dart",
+        "lib/pages/search/search_controller.dart",
+        "lib/pages/search/search_filter_sheet.dart",
+        "lib/pages/search/search_module.dart",
+        "lib/pages/search/search_page.dart",
+        "lib/pages/search/search_widgets.dart"
+      ]
+    },
+    {
+      "name": "settings",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/settings/danmaku/danmaku_module.dart",
+        "lib/pages/settings/danmaku/danmaku_settings.dart",
+        "lib/pages/settings/danmaku/danmaku_settings_sheet.dart",
+        "lib/pages/settings/danmaku/danmaku_shield_editor.dart",
+        "lib/pages/settings/danmaku/danmaku_shield_settings.dart",
+        "lib/pages/settings/danmaku/danmaku_shield_settings_sheet.dart",
+        "lib/pages/settings/danmaku/danmaku_time_offset_sheet.dart",
+        "lib/pages/settings/decoder_settings.dart",
+        "lib/pages/settings/displaymode_settings.dart",
+        "lib/pages/settings/download_settings.dart",
+        "lib/pages/settings/interface_settings.dart",
+        "lib/pages/settings/keyboard_settings.dart",
+        "lib/pages/settings/low_memory_mode_settings.dart",
+        "lib/pages/settings/player_settings.dart",
+        "lib/pages/settings/proxy/proxy_editor_page.dart",
+        "lib/pages/settings/proxy/proxy_module.dart",
+        "lib/pages/settings/proxy/proxy_settings_page.dart",
+        "lib/pages/settings/renderer_settings.dart",
+        "lib/pages/settings/settings_module.dart",
+        "lib/pages/settings/settings_page.dart",
+        "lib/pages/settings/storage_settings.dart",
+        "lib/pages/settings/super_resolution_settings.dart",
+        "lib/pages/settings/sync/bangumi_sync_page.dart",
+        "lib/pages/settings/sync/sync_settings_page.dart",
+        "lib/pages/settings/sync/sync_settings_widgets.dart",
+        "lib/pages/settings/sync/webdav_server_page.dart",
+        "lib/pages/settings/sync/webdav_sync_page.dart",
+        "lib/pages/settings/theme_settings_page.dart",
+        "lib/pages/settings/update_settings.dart"
+      ]
+    },
+    {
+      "name": "timeline",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/timeline/timeline_controller.dart",
+        "lib/pages/timeline/timeline_module.dart",
+        "lib/pages/timeline/timeline_options.dart",
+        "lib/pages/timeline/timeline_page.dart",
+        "lib/pages/timeline/timeline_week_selector.dart"
+      ]
+    },
+    {
+      "name": "video",
+      "status": "partial",
+      "upstream_files": [
+        "lib/pages/video/episode_selection_panel.dart",
+        "lib/pages/video/player_content_tabs.dart",
+        "lib/pages/video/video_controller.dart",
+        "lib/pages/video/video_fullscreen_controller.dart",
+        "lib/pages/video/video_module.dart",
+        "lib/pages/video/video_page.dart",
+        "lib/pages/video/video_page_layout.dart",
+        "lib/pages/video/video_playback_args.dart",
+        "lib/pages/video/video_side_panel.dart",
+        "lib/pages/video/video_system_bars.dart"
+      ]
+    }
+  ]
+}
