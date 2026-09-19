@@ -832,6 +832,48 @@ class Window(Adw.ApplicationWindow):
         )
         group.add(speed)
         page.add(group)
+        groups = {}
+        for title, group_name, key, default in [
+            ("自动播放下一集", "播放行为", "autoPlayNext", True),
+            ("后台继续播放", "播放行为", "backgroundPlayback", False),
+            ("硬件解码", "播放行为", "hardwareDecoder", True),
+            ("播放时显示错误", "播放行为", "showPlayerError", True),
+            ("启用弹幕", "弹幕", "danmakuEnabled", True),
+            ("自动下载弹幕", "下载", "downloadDanmaku", True),
+            ("启动时检查规则更新", "规则", "checkPluginUpdateOnStartup", True),
+            ("启动时检查应用更新", "规则", "autoUpdate", False),
+            ("隐私模式", "隐私", "privateMode", False),
+        ]:
+            group = groups.setdefault(
+                group_name, Adw.PreferencesGroup(title=group_name)
+            )
+            row = Adw.SwitchRow(title=title, active=self.store.get(key, default))
+            row.connect(
+                "notify::active",
+                lambda row, _, key=key: self.store.set(key, row.get_active()),
+            )
+            group.add(row)
+        proxy_enabled = Adw.SwitchRow(
+            title="使用 HTTP 代理",
+            active=self.store.get("proxy_enable", bool(self.store.get("proxy", ""))),
+        )
+        proxy_enabled.connect(
+            "notify::active",
+            lambda row: self.store.set("proxy_enable", row.get_active()),
+        )
+        groups.setdefault("网络", Adw.PreferencesGroup(title="网络")).add(proxy_enabled)
+        proxy_url = Adw.EntryRow(title="代理地址")
+        proxy_url.set_text(self.store.get("proxy", ""))
+        proxy_url.connect(
+            "changed",
+            lambda row: (
+                self.store.set("proxy", row.get_text()),
+                self.http.set_proxy(row.get_text()),
+            ),
+        )
+        groups["网络"].add(proxy_url)
+        for group in groups.values():
+            page.add(group)
         group = Adw.PreferencesGroup(title="帮助")
         shortcut_row = action_row(
             title="键盘快捷键", subtitle="查看播放器和导航快捷键", activatable=True
