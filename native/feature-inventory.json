@@ -5,7 +5,7 @@
   "groups": [
     {
       "name": "about",
-      "status": "pending",
+      "status": "complete",
       "upstream_files": [
         "lib/pages/about/about_module.dart",
         "lib/pages/about/about_page.dart",
@@ -97,7 +97,7 @@
     },
     {
       "name": "logs",
-      "status": "pending",
+      "status": "complete",
       "upstream_files": [
         "lib/pages/logs/logs_page.dart"
       ]
@@ -122,7 +122,7 @@
     },
     {
       "name": "onboarding",
-      "status": "pending",
+      "status": "partial",
       "upstream_files": [
         "lib/pages/onboarding/onboarding_page.dart",
         "lib/pages/onboarding/onboarding_step_layout.dart",
