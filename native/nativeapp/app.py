@@ -513,6 +513,53 @@ class Window(Adw.ApplicationWindow):
         page = self.push(name, view)
         page.connect("hidden", lambda *_: view.pause_and_save())
 
+    def onboarding(self):
+        if self.store.get("onboarding_complete", False):
+            return
+        dialog = Adw.PreferencesDialog(title="开始使用 Kazumi")
+        page = Adw.PreferencesPage(
+            title="欢迎",
+            icon_name="go-home-symbolic",
+        )
+        intro = Adw.PreferencesGroup(
+            title="原生 GTK 版",
+            description="界面使用 GTK4/libadwaita；播放源、收藏、历史和下载数据保存在独立资料库。",
+        )
+        page.add(intro)
+        network = Adw.PreferencesGroup(title="播放源设置")
+        mirror = Adw.EntryRow(title="规则商店地址")
+        mirror.set_text(
+            self.store.get(
+                "rule_catalog",
+                "https://raw.githubusercontent.com/Predidit/KazumiRules/main/catalog.json",
+            )
+        )
+        mirror.connect(
+            "changed",
+            lambda row: self.store.set("rule_catalog", row.get_text().strip()),
+        )
+        network.add(mirror)
+        page.add(network)
+        data = Adw.PreferencesGroup(title="数据迁移")
+        data.add(
+            action_row(
+                title="原版 Hive 数据",
+                subtitle="稍后可从“我的 → 导入原版资料库”读取，不会覆盖原文件。",
+            )
+        )
+        page.add(data)
+        finish = Gtk.Button(label="完成设置", halign=Gtk.Align.CENTER)
+        finish.add_css_class("suggested-action")
+        finish.connect(
+            "clicked",
+            lambda *_: (self.store.set("onboarding_complete", True), dialog.close()),
+        )
+        finish_group = Adw.PreferencesGroup()
+        finish_group.add(finish)
+        page.add(finish_group)
+        dialog.add(page)
+        dialog.present(self)
+
     def account(self):
         from .account import show_account
 
@@ -550,7 +597,12 @@ class Window(Adw.ApplicationWindow):
             ("下载管理", "离线观看", "folder-download-symbolic", self.download_page),
             ("备份与恢复", "原生版资料库备份", "document-save-symbolic", self.backup),
             ("设置", "外观与播放", "preferences-system-symbolic", self.settings),
-            ("操作日志", "查看最近的错误和网络状态", "document-properties-symbolic", self.logs),
+            (
+                "操作日志",
+                "查看最近的错误和网络状态",
+                "document-properties-symbolic",
+                self.logs,
+            ),
             ("关于", "版本、许可证和项目链接", "help-about-symbolic", self.about),
         ]:
             if APP != "Kazumi" and title == "规则管理":
@@ -698,7 +750,9 @@ class Window(Adw.ApplicationWindow):
         header.append(copy)
         header.append(clear)
         body.append(header)
-        view = Gtk.TextView(editable=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR)
+        view = Gtk.TextView(
+            editable=False, monospace=True, wrap_mode=Gtk.WrapMode.WORD_CHAR
+        )
         view.set_vexpand(True)
         view.add_css_class("card")
         body.append(view)
@@ -779,7 +833,9 @@ class Window(Adw.ApplicationWindow):
         group.add(speed)
         page.add(group)
         group = Adw.PreferencesGroup(title="帮助")
-        shortcut_row = action_row(title="键盘快捷键", subtitle="查看播放器和导航快捷键", activatable=True)
+        shortcut_row = action_row(
+            title="键盘快捷键", subtitle="查看播放器和导航快捷键", activatable=True
+        )
         shortcut_row.add_suffix(Gtk.Image(icon_name="go-next-symbolic"))
         shortcut_row.connect("activated", lambda *_: self.shortcuts())
         group.add(shortcut_row)
@@ -787,7 +843,13 @@ class Window(Adw.ApplicationWindow):
         group = Adw.PreferencesGroup(title="网络")
         proxy = Adw.EntryRow(title="HTTP 代理（可选）")
         proxy.set_text(self.store.get("proxy", ""))
-        proxy.connect("changed", lambda row: (self.store.set("proxy", row.get_text()), self.http.set_proxy(row.get_text())))
+        proxy.connect(
+            "changed",
+            lambda row: (
+                self.store.set("proxy", row.get_text()),
+                self.http.set_proxy(row.get_text()),
+            ),
+        )
         group.add(proxy)
         page.add(group)
         dialog.add(page)
@@ -975,6 +1037,8 @@ class Application(Adw.Application):
     def do_activate(self):
         self.window = Window(self, self.store, self.offline)
         self.window.present()
+        if not self.offline:
+            GLib.idle_add(self.window.onboarding)
 
 
 def main():
