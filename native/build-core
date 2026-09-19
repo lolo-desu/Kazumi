@@ -6,5 +6,5 @@ mkdir -p bin
 cd core
 dart pub get
 dart analyze
-dart test
+dart test test verification
 dart compile exe bin/bridge.dart -o ../bin/kazumi-core

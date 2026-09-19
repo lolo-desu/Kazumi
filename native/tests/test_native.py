@@ -102,3 +102,75 @@ class NativeTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AccountAndMigrationTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.store = Store("test", self.temp.name)
+        self.service = Service(None, self.store)
+
+    def test_login_uses_keyring_not_profile(self):
+        class Vault:
+            def set(self, key, value):
+                self.saved = (key, value)
+
+        class Http:
+            def json(inner, url, headers):
+                self.assertEqual(headers["Authorization"], "Bearer private-token")
+                return {"username": "test-user", "nickname": "测试"}
+
+        vault = Vault()
+        self.service._vault = vault
+        self.service.http = Http()
+        self.service.login("private-token")
+        self.assertEqual(vault.saved, ("bangumi", "private-token"))
+        self.assertNotIn("private-token", str(self.store.export_data()))
+
+    def test_upload_keeps_change_made_during_request(self):
+        item = {"id": "42", "title": "test"}
+        self.service.set_collection(item, "想看")
+
+        def authorized(path, **kwargs):
+            self.assertEqual(kwargs["method"], "POST")
+            self.assertEqual(kwargs["data"]["type"], 1)
+            self.service.set_collection(item, "在看")
+
+        self.service.authorized = authorized
+        self.assertEqual(self.service.push_collections(), 1)
+        self.assertEqual(self.store.items("collect_changes")[0]["state"], "在看")
+
+    def test_pull_keeps_local_pending_changes(self):
+        self.store.set("bangumi_account", {"username": "test"})
+        self.service.set_collection({"id": "42", "title": "local"}, "在看")
+        self.service.authorized = lambda *a, **k: {
+            "total": 1,
+            "data": [{"subject": {"id": 42, "name": "remote"}, "type": 2}],
+        }
+        self.assertEqual(self.service.pull_collections(), 0)
+        self.assertEqual(self.store.items("collect")[0]["collection_type"], "在看")
+
+    def test_hive_import_preserves_all_progress_and_newer_local_records(self):
+        self.store.put("history", {"id": "42", "title": "new", "position": 123})
+        history = {
+            "subject": {"id": 42, "name": "old"},
+            "lastWatchEpisode": 2,
+            "lastWatchEpisodeName": "第2集",
+            "episodePageUrl": "https://example.com/2",
+            "lastWatchTime": "2025-01-01T00:00:00",
+            "progresses": {"1": {"progressMs": 1000}, "2": {"progressMs": 90000}},
+        }
+        self.service.core = lambda *a, **k: {
+            "boxes": {"histories": [{"key": "rule42", "value": history}]},
+            "sha256": {"histories": "fixture"},
+        }
+        result = self.service.import_hive("/unused")
+        self.assertEqual(result["mapped"], 0)
+        self.assertEqual(self.store.items("history")[0]["position"], 123)
+        self.assertEqual(
+            self.store.items("legacy_hive")[0]["value"]["progresses"]["1"][
+                "progressMs"
+            ],
+            1000,
+        )

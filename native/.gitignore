@@ -10,3 +10,6 @@ test-output/
 !tests/**
 !core/bin/
 !core/bin/**
+
+__pycache__/
+*.pyc

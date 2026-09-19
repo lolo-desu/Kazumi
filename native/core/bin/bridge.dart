@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'hive_export.dart';
 import 'package:kazumi/plugins/api_rule_config.dart';
 import 'package:kazumi/plugins/anti_crawler_config.dart';
 import 'package:kazumi/services/plugin/api_rule_strategy.dart';
@@ -19,7 +20,8 @@ RuleExecutionConfig config(Map<String, dynamic> p) => RuleExecutionConfig(
   antiCrawlerConfig: AntiCrawlerConfig.fromJson(p['antiCrawlerConfig'] ?? {}),
 );
 
-Object dispatch(Map<String, dynamic> call) {
+Future<Object> dispatch(Map<String, dynamic> call) async {
+  if(call['method']=='hive.export') return exportHive(call['directory']);
   final c = config(Map<String, dynamic>.from(call['plugin']));
   const api = ApiRuleStrategy();
   const xpath = XPathRuleStrategy();
@@ -55,7 +57,7 @@ Object dispatch(Map<String, dynamic> call) {
 Future<void> main() async {
   await for (final line in stdin.transform(utf8.decoder).transform(const LineSplitter())) {
     try {
-      stdout.writeln(jsonEncode({'result': dispatch(jsonDecode(line))}));
+      stdout.writeln(jsonEncode({'result': await dispatch(jsonDecode(line))}));
     } catch (error) {
       stdout.writeln(jsonEncode({'error': error.toString()}));
     }

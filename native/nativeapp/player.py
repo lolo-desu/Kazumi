@@ -25,6 +25,33 @@ class Fbo(C.Structure):
     _fields_ = [("fbo", C.c_int), ("w", C.c_int), ("h", C.c_int), ("format", C.c_int)]
 
 
+class Node(C.Structure):
+    pass
+
+
+class NodeList(C.Structure):
+    pass
+
+
+class NodeValue(C.Union):
+    _fields_ = [
+        ("string", C.c_char_p),
+        ("flag", C.c_int),
+        ("integer", C.c_int64),
+        ("double", C.c_double),
+        ("list", C.POINTER(NodeList)),
+        ("bytes", C.c_void_p),
+    ]
+
+
+Node._fields_ = [("value", NodeValue), ("format", C.c_int)]
+NodeList._fields_ = [
+    ("num", C.c_int),
+    ("values", C.POINTER(Node)),
+    ("keys", C.POINTER(C.c_char_p)),
+]
+
+
 def library(name, env):
     return C.CDLL(
         os.environ.get(env) or ctypes.util.find_library(name) or f"lib{name}.so"
@@ -32,12 +59,13 @@ def library(name, env):
 
 
 class Video(Gtk.GLArea):
-    def __init__(self, report):
+    def __init__(self, report, volume=80):
         super().__init__(hexpand=True, vexpand=True)
         self.set_size_request(240, 160)
         self.set_allowed_apis(Gdk.GLAPI.GL | Gdk.GLAPI.GLES)
         self.set_auto_render(False)
         self.report = report
+        self.initial_volume = volume
         self.handle = None
         self.render_context = C.c_void_p()
         self.worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="mpv")
@@ -71,6 +99,9 @@ class Video(Gtk.GLArea):
             self.bind("mpv_command", C.c_int, C.c_void_p, C.POINTER(C.c_char_p))
             self.bind("mpv_get_property_string", C.c_void_p, C.c_void_p, C.c_char_p)
             self.bind("mpv_free", None, C.c_void_p)
+            self.bind(
+                "mpv_set_property", C.c_int, C.c_void_p, C.c_char_p, C.c_int, C.c_void_p
+            )
             self.bind("mpv_terminate_destroy", None, C.c_void_p)
             self.bind(
                 "mpv_render_context_create",
@@ -98,6 +129,7 @@ class Video(Gtk.GLArea):
                 ("config", "no"),
                 ("idle", "yes"),
                 ("keep-open", "yes"),
+                ("volume", str(self.initial_volume)),
             ]:
                 if (
                     self.mpv.mpv_set_option_string(self.handle, k.encode(), v.encode())
@@ -174,15 +206,33 @@ class Video(Gtk.GLArea):
         if not self.ready:
             self.pending = (url, headers, audio, start)
             return
-        self.command(
-            "set",
-            "http-header-fields",
-            ",".join(f"{k}: {v}" for k, v in (headers or {}).items()),
+        self.set_list(
+            "http-header-fields", [f"{k}: {v}" for k, v in (headers or {}).items()]
         )
-        self.command("set", "audio-files", audio or "")
+        self.set_list("audio-files", [audio] if audio else [])
         self.command("set", "start", str(start))
         self.command("loadfile", url, "replace")
         self.command("set", "pause", "no")
+
+    def set_list(self, name, values):
+        if not self.ready or self.closed:
+            return
+
+        def set_property():
+            encoded = [value.encode() for value in values]
+            entries = (Node * len(encoded))(
+                *(Node(NodeValue(string=value), 1) for value in encoded)
+            )
+            array = NodeList(len(encoded), entries, None)
+            node = Node(NodeValue(list=C.pointer(array)), 7)
+            # Pass native arrays: parsing a colon-separated path list splits URLs.
+            result = self.mpv.mpv_set_property(
+                self.handle, name.encode(), 6, C.byref(node)
+            )
+            if result < 0:
+                GLib.idle_add(self.report, f"播放器设置失败：{name} ({result})")
+
+        self.worker.submit(set_property)
 
     def status(self, callback):
         if not self.ready or self.closed:
@@ -200,6 +250,8 @@ class Video(Gtk.GLArea):
                 "speed",
                 "video-params/w",
                 "video-params/h",
+                "audio-codec-name",
+                "audio-params/channel-count",
             ):
                 ptr = self.mpv.mpv_get_property_string(self.handle, key.encode())
                 if ptr:

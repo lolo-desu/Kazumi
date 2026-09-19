@@ -70,7 +70,8 @@ class Http:
         return content if raw else content.decode(encoding, errors="replace")
 
     def json(self, url, **kwargs):
-        return json.loads(self.request(url, **kwargs))
+        value = self.request(url, **kwargs)
+        return json.loads(value) if value.strip() else None
 
     def image(self, url):
         if url.startswith("//"):

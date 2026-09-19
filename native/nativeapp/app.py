@@ -357,10 +357,7 @@ class Window(Adw.ApplicationWindow):
             choice = Gtk.Button(label=state)
 
             def selected(_, state=state):
-                if state == "移除收藏":
-                    self.store.remove("collect", item["id"])
-                else:
-                    self.store.put("collect", {**item, "collection_type": state})
+                self.service.set_collection(item, state)
                 pop.popdown()
                 self.message("已更新收藏")
 
@@ -405,7 +402,33 @@ class Window(Adw.ApplicationWindow):
             for result in results:
                 rule = result["plugin"]
                 if result.get("error"):
-                    group.add(action_row(title=rule["name"], subtitle=result["error"]))
+                    row = action_row(title=rule["name"], subtitle=result["error"])
+                    if "CaptchaRequiredException" in result["error"]:
+                        verify = Gtk.Button(label="验证", valign=Gtk.Align.CENTER)
+
+                        def begin(_, rule=rule):
+                            def prepared(request):
+                                from .webview import Verification
+
+                                Verification(
+                                    self,
+                                    rule,
+                                    request["url"],
+                                    lambda: self.sources(item, body),
+                                ).present(self)
+
+                            self.async_call(
+                                lambda: self.service.core(
+                                    "search.prepare",
+                                    rule,
+                                    input=item.get("original_title") or item["title"],
+                                ),
+                                prepared,
+                            )
+
+                        verify.connect("clicked", begin)
+                        row.add_suffix(verify)
+                    group.add(row)
                     continue
                 for match in result["items"]:
                     row = action_row(
@@ -482,10 +505,22 @@ class Window(Adw.ApplicationWindow):
         page = self.push(name, view)
         page.connect("hidden", lambda *_: view.pause_and_save())
 
+    def account(self):
+        from .account import show_account
+
+        show_account(self)
+
     def personal(self):
         self.clear()
         group = Adw.PreferencesGroup(title="资料库")
         for title, subtitle, icon, callback in [
+            ("Bangumi 账号", "登录与收藏同步", "avatar-default-symbolic", self.account),
+            (
+                "导入原版资料库",
+                "读取 Hive 快照，保留原文件",
+                "document-open-symbolic",
+                self.import_legacy,
+            ),
             (
                 "历史记录",
                 "继续观看",
@@ -586,6 +621,24 @@ class Window(Adw.ApplicationWindow):
             body.append(group)
 
         refresh()
+
+    def import_legacy(self):
+        dialog = Gtk.FileDialog(title="选择原版 Kazumi 的 hive 文件夹（请先关闭原版）")
+
+        def chosen(dialog, result):
+            try:
+                directory = dialog.select_folder_finish(result).get_path()
+            except GLib.Error:
+                return
+            self.async_call(
+                lambda: self.service.import_hive(directory),
+                lambda result: self.message(
+                    f"已导入 {result['mapped']} 条收藏/历史，保留 {result['preserved']} 条兼容记录"
+                ),
+                scoped=False,
+            )
+
+        dialog.select_folder(self, None, chosen)
 
     def open_file(self):
         dialog = Gtk.FileDialog(title="打开视频")

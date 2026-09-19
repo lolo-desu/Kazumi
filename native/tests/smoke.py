@@ -25,6 +25,8 @@ errors = []
 
 
 def capture():
+    if not hasattr(app, "window") or app.window.get_width() <= 300:
+        return True
     window = app.window
     Gtk.Settings.get_default().set_property("gtk-enable-animations", False)
     try:
@@ -106,6 +108,9 @@ def render():
 
 
 GLib.timeout_add(700, capture)
+GLib.timeout_add_seconds(
+    30, lambda: (errors.append("GTK startup timeout"), app.quit(), False)[-1]
+)
 app.run(["gtk-smoke"])
 if errors:
     print("\n".join(errors), file=sys.stderr)

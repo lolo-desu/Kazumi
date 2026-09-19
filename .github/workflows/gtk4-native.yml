@@ -13,7 +13,7 @@ jobs:
       - name: Install native dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-webkit-6.0 libmpv2 ffmpeg xvfb dbus-x11 mesa-utils
+          sudo apt-get install -y python3-gi python3-gi-cairo gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-webkit-6.0 libmpv2 gstreamer1.0-plugins-bad ffmpeg gir1.2-secret-1 qrencode xvfb dbus-x11 mesa-utils
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
@@ -36,7 +36,13 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: 1
         run: |
           ffmpeg -loglevel error -f lavfi -i testsrc2=size=640x360:rate=24 -t 8 -c:v mpeg4 -y /tmp/native-test.mp4
-          xvfb-run -a dbus-run-session -- python3 native/tests/player_smoke.py /tmp/native-test.mp4
+          ffmpeg -loglevel error -f lavfi -i sine=frequency=440 -t 8 -c:a aac -y /tmp/native-audio.m4a
+          xvfb-run -a dbus-run-session -- python3 native/tests/player_smoke.py /tmp/native-test.mp4 /tmp/native-audio.m4a
+      - name: WebKit parsing and cookie integration
+        env:
+          GDK_BACKEND: x11
+          GSK_RENDERER: cairo
+        run: xvfb-run -a dbus-run-session -- python3 native/tests/webview_smoke.py
       - name: Package experimental native frontend
         run: |
           mkdir -p package/native

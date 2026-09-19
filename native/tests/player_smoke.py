@@ -1,4 +1,7 @@
 import sys
+import functools
+import threading
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import tempfile
 import traceback
 from pathlib import Path
@@ -16,9 +19,27 @@ from nativeapp.services import APP
 app = Application(Store(APP, tempfile.mkdtemp()), True)
 errors = []
 result = {}
+server = None
+audio_url = None
+if len(sys.argv) > 2:
+
+    class QuietHandler(SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+    audio_path = Path(sys.argv[2]).resolve()
+    server = ThreadingHTTPServer(
+        ("127.0.0.1", 0),
+        functools.partial(QuietHandler, directory=str(audio_path.parent)),
+    )
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    audio_url = f"http://127.0.0.1:{server.server_port}/{audio_path.name}"
+app.store.set("volume", 0)
 
 
 def start():
+    if not hasattr(app, "window") or app.window.get_width() <= 300:
+        return True
     original = app.window.message
     app.window.message = lambda text: (
         print("PLAYER:", text, flush=True),
@@ -28,7 +49,11 @@ def start():
         {"id": "fixture", "title": "播放器集成测试", "url": sys.argv[1]},
         "播放器集成测试",
         sys.argv[1],
+        audio=audio_url,
     )
+    from nativeapp.danmaku import Comment
+
+    app.window.playback.danmaku.add([Comment(0, "GTK 弹幕"), Comment(1, "顶部弹幕", 5)])
     GLib.timeout_add(4500, check)
     return False
 
@@ -47,6 +72,9 @@ def check():
     def got(status):
         try:
             assert float(status.get("time-pos", 0)) > 1, status
+            if audio_url:
+                assert int(status.get("audio-params/channel-count", 0)) > 0, status
+            assert len(app.window.playback.danmaku.plan) == 2
             assert int(status.get("video-params/w", 0)) == 640, status
             video.command("set", "pause", "yes")
             video.command("seek", 2, "absolute")
@@ -78,9 +106,11 @@ def verify_seek():
 
 GLib.timeout_add(500, start)
 GLib.timeout_add(
-    14000, lambda: (errors.append("player timeout"), app.quit(), False)[-1]
+    30000, lambda: (errors.append("player timeout"), app.quit(), False)[-1]
 )
 app.run(["native-player-test"])
+if server:
+    server.shutdown()
 if errors:
     print("\n".join(errors), file=sys.stderr)
     sys.exit(1)
