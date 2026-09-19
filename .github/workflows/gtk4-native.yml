@@ -1,7 +1,7 @@
 name: GTK4 Native (experimental)
 on:
   push:
-    branches: [gtk4-native]
+    branches: [gtk4-native, gtk4-native-continuation]
   workflow_dispatch:
 permissions:
   contents: read
